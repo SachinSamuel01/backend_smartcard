@@ -3,7 +3,7 @@ import qdrant_client
 import os, shutil
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyMuPDFLoader
+from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyMuPDFLoader, PyPDFLoader
 from langchain_community.document_loaders.unstructured import UnstructuredFileLoader
 
 
@@ -56,7 +56,7 @@ def create_vectorstore(collection_name):
 
 def append_data_vectorstore(vector_store,collection_path):
    # loader= DirectoryLoader(collection_path,glob="**/*.txt" ,loader_cls=TextLoader)
-    loader= DirectoryLoader(collection_path,glob="**/*.pdf" ,loader_cls=PyMuPDFLoader)
+    loader= DirectoryLoader(collection_path,glob="**/*.pdf" ,loader_cls=PyPDFLoader)
     documents= loader.load()
 
     text_splitter= RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100, length_function= len)
