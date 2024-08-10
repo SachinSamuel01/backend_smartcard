@@ -10,8 +10,8 @@ langchain-qdrant
 Scrapy
 regex
 unstructured
-python-magic==0.4.27
 selenium
 playwright
 fitz
 pymupdf
+python-multipart
