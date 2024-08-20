@@ -4,8 +4,8 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
-from langchain.agents import Agent
-from langchain.chains import JSONChain, XMLChain
+# from langchain.agents import Agent
+# from langchain.chains import JSONChain, XMLChain
 
 
 from langchain.agents.agent_types import AgentType
@@ -86,23 +86,23 @@ def csv_agent_reponse(csv_agent, query):
     return csv_agent.run(query)
 
 
-class JSONAgent(Agent):
-    def __init__(self, llm, json_data: dict):
-        self.llm = llm
-        self.chain = JSONChain(llm)
-        self.json_data = json_data
+# class JSONAgent(Agent):
+#     def __init__(self, llm, json_data: dict):
+#         self.llm = llm
+#         self.chain = JSONChain(llm)
+#         self.json_data = json_data
 
-    def run(self, query: str):
-        output = self.chain.run(self.json_data, query)
-        return output
+#     def run(self, query: str):
+#         output = self.chain.run(self.json_data, query)
+#         return output
 
 
-class XMLAgent(Agent):
-    def __init__(self, llm, xml_data: str):
-        self.llm = llm
-        self.chain = XMLChain(llm)
-        self.xml_data = xml_data
+# class XMLAgent(Agent):
+#     def __init__(self, llm, xml_data: str):
+#         self.llm = llm
+#         self.chain = XMLChain(llm)
+#         self.xml_data = xml_data
 
-    def run(self, query: str):
-        output = self.chain.run(self.xml_data, query)
-        return output
+#     def run(self, query: str):
+#         output = self.chain.run(self.xml_data, query)
+#         return output
