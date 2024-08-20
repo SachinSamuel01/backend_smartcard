@@ -21,7 +21,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:3000"],  # Be more specific in production
+    allow_origins=["*", "http://localhost:3000", "https://pdf-chat-nu-green.vercel.app/","https://pdf-chat-nu-green.vercel.app/backend-testing"],  # Be more specific in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
