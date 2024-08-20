@@ -16,3 +16,6 @@ fitz
 pymupdf
 python-multipart
 uvicorn
+pytesseract
+langchain-experimental
+scikit-learn

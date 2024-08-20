@@ -59,7 +59,7 @@ def append_data_vectorstore(vector_store,collection_path):
     loader= DirectoryLoader(collection_path,glob="**/*.pdf" ,loader_cls=PyPDFLoader)
     documents= loader.load()
 
-    text_splitter= RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100, length_function= len)
+    text_splitter= RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=150, length_function= len)
     docs=text_splitter.split_documents(documents)
 
     vector_store.add_documents(docs)
@@ -74,6 +74,7 @@ def vector_store_to_retriever(vector_store):
 def retrieve_content(retriever,query):
     
     docs=retriever.invoke(query)
+    print(len(docs))
     content=docs[0]
     
     return content
