@@ -30,8 +30,12 @@ vector_config= qdrant_client.http.models.VectorParams(
 
 files_already_exists_path= r'./uploads/filesUploads'
 
-collection_dir= set(os.listdir(files_already_exists_path))
+try:
 
+    collection_dir= set(os.listdir(files_already_exists_path))
+
+except:
+    collection_dir= set()
 
 
 
