@@ -3,6 +3,7 @@ env/
 main.py
 pdf_extraction2.py
 pdf_extraction.py
+firebase_fileUploads.py
 
 test_uploads/
 prompt.py

@@ -14,15 +14,15 @@ warnings.filterwarnings("ignore")
 
 from component.vectordb import create_vectorstore, append_data_vectorstore, retrieve_content, vector_store_to_retriever, delete_collection
 from component.response import doc_agent_response, create_csv_agent_from_llm, csv_agent_reponse
-from component.webcrawling import scrape_and_save_links
+# from component.webcrawling import scrape_and_save_links
 from component.reading_cards import get_text_from_img
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:3000", "https://pdf-chat-nu-green.vercel.app/","https://pdf-chat-nu-green.vercel.app/backend-testing"],  # Be more specific in production
     allow_credentials=True,
+    allow_origins=["*", "http://localhost:3000", "https://pdf-chat-nu-green.vercel.app","https://pdf-chat-nu-green.vercel.app/backend-testing"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -152,6 +152,7 @@ async def upload_files(
     if files:
         for file in files:
             file_path = os.path.join(collection_dir, file.filename)
+            print(file_path)
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
@@ -161,7 +162,8 @@ async def upload_files(
     if links:
         links_list = [link.strip() for link in links.split("\n") if link.strip()]
         if links_list:
-            scrape_and_save_links(links_list, collection_dir)
+            pass
+          #  scrape_and_save_links(links_list, collection_dir)
 
     # Create vector store (assuming this is defined elsewhere in your code)
     
@@ -172,7 +174,7 @@ async def upload_files(
 
     return JSONResponse(status_code=200, content={"message": "Files and links uploaded successfully."})
 
-@app.get("/collections/")
+@app.get("/collections")
 async def get_collections():
     if not os.path.exists(BASE_DIR):
         return []
@@ -217,14 +219,17 @@ async def deploy_collection(name: str):
     return {"vector_db": vector_db, "message": f"Collection {name} deployed"}
 
 
-@app.post("/collections/delete")
+@app.delete("/collections/delete")
 async def delete_data_collection(request:dict):
-    name= request.get('name')
-    delete_collection(name)
-    return JSONResponse(status_code=200, content={"message": f"The collection {name} is deleted."})
+    try:
+        name= request.get('name')
+        delete_collection(name)
+        return JSONResponse(status_code=200, content={"message": f"The collection {name} is deleted."})
+    except Exception as e:
+        return JSONResponse(status_code=400, content={'error':str(e)})
 
 
-@app.post("/query/")
+@app.post("/query")
 async def process_query(request: dict):
     
     # collection = request.get("collection")
@@ -254,7 +259,7 @@ async def process_query(request: dict):
     return {"response": response}
 
 
-@app.post("/upload_image/")
+@app.post("/upload_image")
 async def upload_image(image: UploadFile = File(...)):
     # Get the original filename from the uploaded file
     

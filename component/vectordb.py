@@ -85,6 +85,7 @@ def delete_collection(collection_name):
     client.delete_collection(collection_name=collection_name)
     dir= os.path.join(files_already_exists_path,collection_name)
     shutil.rmtree(dir)
+    collection_dir.remove(collection_name)
     
 
 

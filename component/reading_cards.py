@@ -17,7 +17,7 @@ def extract_text_from_image(image_path, code, username, url):
 
     if r.status_code == 401:
         #Please provide valid username and license code
-        return "Your license code is not valid and has used total no. of usage"
+        return "Your license code is not valid or you have used total no. of usage"
 
     # Decode Output response
     jobj = json.loads(r.content)
