@@ -15,10 +15,10 @@ warnings.filterwarnings("ignore")
 
 from component.vectordb import create_vectorstore, append_PDFdata_vectorstore, append_DOCXdata_vectorstore, retrieve_content, vector_store_to_retriever, delete_collection, load_json_files
 from component.response import doc_agent_response, create_csv_agent_from_llm, csv_agent_reponse, create_json_agent_from_llm, json_agent_response
-from component.webcrawling2 import business_card_research
-from component.reading_cards import get_text_from_img
+# from component.webcrawling2 import business_card_research
+# from component.reading_cards import get_text_from_img
 
-from component.brower_search import business_card_webSearch
+# from component.brower_search import business_card_webSearch
 from component.xml_agent import SimpleXMLAgent
 from component.srt_agent import ImprovedSRTAgent
 
