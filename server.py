@@ -9,15 +9,22 @@ import re
 import glob
 from fastapi.middleware.cors import CORSMiddleware
 
+
 import warnings
 warnings.filterwarnings("ignore")
 
-from component.vectordb import create_vectorstore, append_data_vectorstore, retrieve_content, vector_store_to_retriever, delete_collection
-from component.response import doc_agent_response, create_csv_agent_from_llm, csv_agent_reponse
-# from component.webcrawling import scrape_and_save_links
+from component.vectordb import create_vectorstore, append_PDFdata_vectorstore, append_DOCXdata_vectorstore, retrieve_content, vector_store_to_retriever, delete_collection, load_json_files
+from component.response import doc_agent_response, create_csv_agent_from_llm, csv_agent_reponse, create_json_agent_from_llm, json_agent_response
+from component.webcrawling2 import business_card_research
 from component.reading_cards import get_text_from_img
 
+from component.brower_search import business_card_webSearch
+from component.xml_agent import SimpleXMLAgent
+from component.srt_agent import ImprovedSRTAgent
+
+
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,8 +41,11 @@ chat_lst=[]
 
 vector_retriever= None
 csv_agent= None
+json_agent= None
+srt_agent= None
+xml_agent= None
 
-
+img_ocr= None
 
 prompt=''' 
 Follow these principles in your interactions:
@@ -125,6 +135,10 @@ Analyze the text, identify the card type, and extract relevant information. Stru
 
 '''
 
+prompt4= '''
+You are provided with information using that you have to write detailed research description in points that explains everything
+'''
+
 class UploadRequest(BaseModel):
     name: str
     links: Optional[str] = None
@@ -168,9 +182,14 @@ async def upload_files(
     # Create vector store (assuming this is defined elsewhere in your code)
     
     pdf_lst= glob.glob(f"{collection_dir}/*.pdf")
+    docx_lst= glob.glob(f"{collection_dir}/*.docx")
     if len(pdf_lst)!=0:
         vector_store = create_vectorstore(name)
-        append_data_vectorstore(vector_store,collection_dir)
+        append_PDFdata_vectorstore(vector_store,collection_dir)
+
+    elif len(docx_lst)!=0:
+        vector_store = create_vectorstore(name)
+        append_DOCXdata_vectorstore(vector_store,collection_dir)
 
     return JSONResponse(status_code=200, content={"message": "Files and links uploaded successfully."})
 
@@ -189,10 +208,20 @@ async def get_collections():
 async def deploy_collection(name: str):
     global vector_retriever
     global csv_agent
+    global json_agent
+    global srt_agent
+    global xml_agent
+    global img_ocr
     
     collection_dir = os.path.join(BASE_DIR, name)
     pdf_lst= glob.glob(f"{collection_dir}/*.pdf")
-    if len(pdf_lst)!=0:
+    docx_lst= glob.glob(f"{collection_dir}/*.docx")
+    csv_lst= glob.glob(f"{collection_dir}/*.csv")
+    json_lst= glob.glob(f"{collection_dir}/*.json")
+    srt_lst= glob.glob(f"{collection_dir}/*.srt")
+    xml_lst= glob.glob(f"{collection_dir}/*.xml")
+    img_lst= glob.glob(f"{collection_dir}/*.jpg")
+    if len(pdf_lst)!=0 or len(docx_lst)!=0:
 
         vector_store = create_vectorstore(name)
         retriever= vector_store_to_retriever(vector_store)
@@ -201,12 +230,36 @@ async def deploy_collection(name: str):
     else:
         vector_retriever= None
     
-    csv_lst= glob.glob(f"{collection_dir}/*.csv")
     
+    
+    if len(json_lst)!=0:
+        data= load_json_files(collection_dir)
+        json_agent= create_json_agent_from_llm(data)
+    else:
+        json_agent= None
+
+    if len(srt_lst)!=0:
+        srt_agent= ImprovedSRTAgent(collection_dir)
+    else:
+        srt_agent= None
+
+    if len(xml_lst)!=0:
+        xml_agent= SimpleXMLAgent(collection_dir)
+    else:
+        xml_agent= None
+
     if len(csv_lst)!=0:
         csv_agent= create_csv_agent_from_llm(csv_lst)
     else:
         csv_agent= None
+
+    if len(img_lst)!=0:
+        img_ocr= create_csv_agent_from_llm(collection_dir)
+    else:
+        img_ocr= None
+
+    
+    
     
     if not os.path.exists(collection_dir):
         raise HTTPException(status_code=404, detail="Collection not found")
@@ -252,8 +305,20 @@ async def process_query(request: dict):
             chat= f'Query: {query}\nResponse: {response}'
             chat_lst.append(chat)
 
-    if csv_agent != None:
+    elif csv_agent != None:
         response= csv_agent_reponse(csv_agent, query)
+
+    elif json_agent != None:
+        response= json_agent_response(json_agent, query)
+
+    elif xml_agent != None:
+        response= xml_agent.query(query)
+
+    elif srt_agent != None:
+        response= srt_agent.query( query)
+
+    elif img_ocr != None:
+        response= json_agent_response(json_agent, query)
 
     
     return {"response": response}
@@ -283,7 +348,20 @@ async def upload_image(image: UploadFile = File(...)):
     response= match.group()
 
     
-    json_content= eval(response)
+    json_response= eval(response)
+    for i in json_response.keys():
+        search_obj=json_response[i]
+        break
+
+    print(search_obj)
+    search_link= business_card_webSearch(search_obj)
+    print(search_link)
+    response= await business_card_research(search_link)
+
+
+    print(response)
+
+    response= doc_agent_response(prompt4,response,'NONE', 'NONE')
 
     
     # with open(os.path.join(IMG_UPLOAD_DIR,'card_data.json'), 'a') as f:

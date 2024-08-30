@@ -3,9 +3,9 @@ import qdrant_client
 import os, shutil
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyMuPDFLoader, PyPDFLoader
+from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyMuPDFLoader, PyPDFLoader, JSONLoader, Docx2txtLoader
 from langchain_community.document_loaders.unstructured import UnstructuredFileLoader
-
+import json
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -58,15 +58,34 @@ def create_vectorstore(collection_name):
 
     return vector_store
 
-def append_data_vectorstore(vector_store,collection_path):
+def append_PDFdata_vectorstore(vector_store,collection_path):
    # loader= DirectoryLoader(collection_path,glob="**/*.txt" ,loader_cls=TextLoader)
+    
     loader= DirectoryLoader(collection_path,glob="**/*.pdf" ,loader_cls=PyPDFLoader)
+    
+    
     documents= loader.load()
+    
 
     text_splitter= RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=150, length_function= len)
     docs=text_splitter.split_documents(documents)
 
     vector_store.add_documents(docs)
+
+def append_DOCXdata_vectorstore(vector_store,collection_path):
+   # loader= DirectoryLoader(collection_path,glob="**/*.txt" ,loader_cls=TextLoader)
+    
+    loader= DirectoryLoader(collection_path,glob="**/*.docx" ,loader_cls=Docx2txtLoader)
+    
+    
+    documents= loader.load()
+    
+
+    text_splitter= RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=150, length_function= len)
+    docs=text_splitter.split_documents(documents)
+
+    vector_store.add_documents(docs)
+
 
     
 
@@ -94,6 +113,18 @@ def delete_collection(collection_name):
 
 
 
+def load_json_files(collection_path):
+    json_data = {}
+    for filename in os.listdir(collection_path):
+        if filename.endswith('.json'):
+            file_path = os.path.join(collection_path, filename)
+            with open(file_path, 'r') as file:
+                try:
+                    data = json.load(file)
+                    json_data[filename] = data
+                except json.JSONDecodeError:
+                    print(f"Error decoding JSON from file: {filename}")
+    return json_data
 
 
 
@@ -110,3 +141,8 @@ def delete_collection(collection_name):
 # query = "tell me the contents provided to you"
 # content = retrieve_content(retriever, query)
 # print(f"Retrieved content: {content}")
+
+
+
+
+

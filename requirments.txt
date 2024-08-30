@@ -19,3 +19,4 @@ uvicorn
 langchain-experimental
 scikit-learn
 firebase-admin
+docx2txt

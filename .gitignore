@@ -8,3 +8,5 @@ firebase_fileUploads.py
 test_uploads/
 prompt.py
 webcrawling.py
+webcrawling2.py
+brower_search.py
